@@ -10,7 +10,7 @@
 ## 🚀 快速開始
 
 ### 本地執行
-1. 克隆專案：`git clone https://github.com/你的帳號/gemini-meme-generator.git`
+1. 克隆專案：`https://github.com/Octoberlobster/meme_generator.git`
 2. 安裝套件：`pip install -r requirements.txt`
 3. 執行：`streamlit run app.py`
 
