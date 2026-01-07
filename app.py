@@ -35,7 +35,7 @@ def generate_meme(user_prompt, style, reference_image=None):
         return None
 
     # 使用支援產圖的最新模型
-    model = genai.GenerativeModel('gemini-2.0-flash-exp') 
+    model = genai.GenerativeModel('gemini-3-pro-image-preview') 
     
     prompt = f"You are a professional meme creator. Generate a funny meme based on: '{user_prompt}' with style: '{style}'. Include humorous text in the image."
     
@@ -57,7 +57,7 @@ def generate_meme(user_prompt, style, reference_image=None):
         return None
 
 # --- 4. 主介面佈局 ---
-st.title("🎭 Gemini 2.0 Meme Generator")
+st.title("🎭 Gemini 3.0 Meme Generator")
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
