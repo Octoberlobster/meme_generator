@@ -1,28 +1,65 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Gemini Meme Studio</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.css" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script src="https://cdn.jsdelivr.net/npm/@stlite/mountable@0.31.0/build/stlite.js"></script>
-    <script>
-      stlite.mount({
-        requirements: ["google-generativeai", "Pillow"], // 這裡寫下需要的套件
-        entrypoint: "app.py",
-        files: {
-          "app.py": `
-# 這裡貼上你完整的 app.py 程式碼
+<script>
+  stlite.mount({
+    requirements: ["requests", "Pillow"], // 這裡不再需要 google-generativeai
+    entrypoint: "app.py",
+    files: {
+      "app.py": `
 import streamlit as st
-import google.generativeai as genai
-# ... (其餘程式碼)
-          `,
-        },
-      }, document.getElementById("root"));
-    </script>
-  </body>
-</html>
+import requests
+import json
+import base64
+from PIL import Image
+import io
+
+st.set_page_config(page_title="Gemini WASM Studio", layout="wide")
+
+# --- 側邊欄：金鑰 ---
+st.sidebar.title("🔑 設定")
+user_api_key = st.sidebar.text_input("Enter Gemini API Key", type="password")
+
+# --- 核心邏輯：使用 REST API ---
+def generate_via_rest(prompt, api_key):
+    # Gemini 2.0 Flash REST 端點
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key={api_key}"
+    
+    headers = {'Content-Type': 'application/json'}
+    
+    # 設定 Payload (要求圖片輸出)
+    payload = {
+        "contents": [{
+            "parts": [
+                {"text": prompt}
+            ]
+        }],
+        "generationConfig": {
+            "response_modalities": ["IMAGE"]
+        }
+    }
+    
+    response = requests.post(url, headers=headers, json=payload)
+    result = response.json()
+    
+    try:
+        # 提取回傳的 Base64 圖片數據
+        img_data_base64 = result['candidates'][0]['content']['parts'][0]['inlineData']['data']
+        return base64.b64decode(img_data_base64)
+    except Exception as e:
+        st.error(f"API 失敗: {result}")
+        return None
+
+# --- UI 介面 ---
+st.title("🎭 Gemini 2.0 瀏覽器版謎因產生器")
+user_text = st.text_input("輸入你的謎因點子：")
+
+if st.button("🚀 生成"):
+    if not user_api_key:
+        st.error("請輸入 API Key")
+    else:
+        with st.spinner("思考中..."):
+            img_bytes = generate_via_rest(user_text, user_api_key)
+            if img_bytes:
+                st.image(img_bytes)
+      `
+    }
+  }, document.getElementById("root"));
+</script>
